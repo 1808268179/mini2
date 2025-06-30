@@ -1,0 +1,52 @@
+<!--pages/login/login.wxml-->
+<view class="container" style="position: relative; left: 0rpx; top: 0rpx">
+  <view class="header">
+    <view class="logo-wrapper">
+      <image class="logo" src="/images/orchid-logo.png" mode="aspectFit" style="position: relative; left: -6rpx; top: -6rpx"></image>
+      <view class="logo-bg"></view>
+    </view>
+    <text class="title">智能兰花识别</text>
+    <text class="subtitle">拍照或上传图片，轻松识别兰花品种</text>
+    
+    <view class="features">
+      <view class="feature-item">
+        <image class="feature-icon" src="/images/icons/camera.png"></image>
+        <text class="feature-text">拍照识别</text>
+      </view>
+      <view class="feature-item">
+        <image class="feature-icon" src="/images/icons/gallery.png"></image>
+        <text class="feature-text">相册选择</text>
+      </view>
+      <view class="feature-item">
+        <image class="feature-icon" src="/images/icons/history.png"></image>
+        <text class="feature-text">历史记录</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="login-section">
+    <view class="login-button-wrapper">
+      <button 
+        class="login-button {{isLoading ? 'loading' : ''}}" 
+        bindtap="handleLogin"
+        disabled="{{isLoading}}"
+      >
+        <view wx:if="{{isLoading}}" class="loading-icon"></view>
+        <text>{{isLoading ? '登录中...' : '微信授权登录'}}</text>
+      </button>
+    </view>
+    
+    <view class="quick-start">
+      <text class="quick-text" bindtap="handleQuickStart">快速体验 ></text>
+    </view>
+  </view>
+
+  <view class="footer">
+    <text class="footer-text">技术支持 · 微信云开发</text>
+    <view class="version">v1.0.0</view>
+  </view>
+  
+  <!-- 装饰性元素 -->
+  <view class="decoration decoration-1"></view>
+  <view class="decoration decoration-2"></view>
+</view>

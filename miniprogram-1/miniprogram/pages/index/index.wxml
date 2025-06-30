@@ -1,0 +1,110 @@
+<view class="recognition-container">
+  <!-- 顶部装饰背景 -->
+  <view class="header-decoration">
+    <view class="decoration-circle circle-1"></view>
+    <view class="decoration-circle circle-2"></view>
+    <view class="decoration-circle circle-3"></view>
+  </view>
+
+  <!-- 页面标题 -->
+  <view class="page-title">
+    <view class="title-icon">🌺</view>
+    <text class="title-text">AI 兰花识别</text>
+    <text class="subtitle-text">上传图片，智能识别兰花品种</text>
+  </view>
+
+  <!-- 图片上传区域 -->
+  <view class="upload-section">
+    <view class="image-wrapper {{imageSrc ? 'has-image' : ''}} {{isUploading ? 'uploading' : ''}}" bindtap="chooseImage">
+      <image wx:if="{{imageSrc}}" src="{{imageSrc}}" class="preview-image" mode="aspectFill"></image>
+      <view wx:else class="placeholder">
+        <view class="upload-icon">
+          <view class="icon-camera">📷</view>
+        </view>
+        <text class="placeholder-text">点击上传兰花图片</text>
+        <text class="placeholder-subtext">支持相册选择或相机拍摄</text>
+      </view>
+      <view wx:if="{{isUploading}}" class="upload-overlay">
+        <view class="upload-spinner"></view>
+        <text class="upload-text">图片上传中...</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 识别结果卡片 -->
+  <view class="result-card {{result.name ? 'show' : ''}}" wx:if="{{result.name}}">
+    <view class="card-header">
+      <view class="result-badge">
+        <text class="badge-text">AI识别结果</text>
+      </view>
+      <view class="confidence-chip {{getConfidenceLevel(result.confidence)}}">
+        {{getConfidenceText(result.confidence)}}
+      </view>
+    </view>
+    
+    <view class="result-content">
+      <view class="species-info">
+        <view class="species-icon">🌸</view>
+        <view class="species-details">
+          <text class="species-name">{{result.name}}</text>
+          <text class="species-latin">{{result.latin || 'Orchidaceae Family'}}</text>
+        </view>
+      </view>
+      
+      <view class="confidence-section">
+        <view class="confidence-label">
+          <text class="label-text">识别置信度</text>
+          <!-- <text class="confidence-value">{{(result.confidence * 100).toFixed(1)}}%</text> -->
+          <text class="confidence-value">{{(result.confidence * 100)}}%</text>
+        </view>
+        <view class="progress-container">
+          <view class="progress-track">
+            <view class="progress-fill" style="width: {{result.confidence * 100}}"></view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 特征描述 -->
+      <view class="features-section" wx:if="{{result.features && result.features.length}}">
+        <text class="features-title">主要特征</text>
+        <view class="features-list">
+          <view class="feature-item" wx:for="{{result.features}}" wx:key="index">
+            <text class="feature-text">{{item}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 操作按钮区域 -->
+  <view class="actions-section">
+    <button class="primary-btn" bindtap="startRecognition" disabled="{{!imageSrc || isLoading}}" hover-class="primary-btn-active" data-loading="{{isLoading}}">
+      <view wx:if="{{isLoading}}" class="btn-loader"></view>
+      <text class="btn-text">{{isLoading ? '正在识别中...' : '开始AI识别'}}</text>
+    </button>
+    
+    <view class="secondary-actions" wx:if="{{imageSrc}}">
+      <button class="secondary-btn" bindtap="chooseImage" hover-class="secondary-btn-active">
+        <text class="btn-icon">🔄</text>
+        <text class="btn-text">重新选择</text>
+      </button>
+      <button class="secondary-btn" bindtap="clearResult" hover-class="secondary-btn-active" wx:if="{{result.name}}">
+        <text class="btn-icon">🗑️</text>
+        <text class="btn-text">清除结果</text>
+      </button>
+    </view>
+  </view>
+
+  <!-- 底部退出按钮 -->
+  <view class="footer-section">
+    <button class="logout-btn" bindtap="logout" hover-class="logout-btn-active">
+      <text class="logout-icon">👋</text>
+      <text class="logout-text">退出登录</text>
+    </button>
+  </view>
+
+  <!-- 浮动提示 -->
+  <view class="floating-tips" wx:if="{{!imageSrc && !result.name}}">
+    <text class="tips-text">💡 选择清晰的兰花照片可以提高识别准确率</text>
+  </view>
+</view>
