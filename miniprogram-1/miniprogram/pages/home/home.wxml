@@ -67,14 +67,14 @@
             <view class="section-title-container">
                 <text class="section-title">{{getCurrentCategoryName()}}</text>
                 <view class="section-count-badge">
-                    <text class="section-count">{{filteredOrchids.length}}</text>
+                    <text class="section-count">{{allOrchids.length}}</text>
                 </view>
             </view>
             <view class="section-decoration"></view>
         </view>
 
-        <view class="orchids-grid" wx:if="{{filteredOrchids.length > 0}}">
-            <view class="orchid-card" wx:for="{{filteredOrchids}}" wx:key="_id" bindtap="showOrchidDetail" data-orchid="{{orchid}}">
+        <view class="orchids-grid" wx:if="{{allOrchids.length > 0}}">
+            <view class="orchid-card" wx:for="{{allOrchids}}" wx:key="_id" bindtap="showOrchidDetail" data-orchid="{{orchid}}">
                 <view class="card-image">
                     <image class="orchid-image" src="{{orchid.image}}" mode="aspectFill"/>
                     <view class="image-gradient"></view>
