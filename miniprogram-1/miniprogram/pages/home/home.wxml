@@ -1,3 +1,4 @@
+<!-- home.wxml -->
 <view class="home-container">
     <!-- 加载状态 -->
     <view class="loading-overlay" wx:if="{{isLoading}}">
@@ -24,8 +25,8 @@
             <view class="header-actions">
                 <button class="scan-btn" bindtap="goToRecognition">
                     <view class="scan-btn-inner">
-                        <text class="scan-icon">📸</text>
-                        <text class="scan-text">识别</text>
+                        <text class="scan-icon" style="position: relative; left: 62rpx; top: 0rpx">📸</text>
+                        <text class="scan-text" style="position: relative; left: 48rpx; top: 0rpx">识别</text>
                     </view>
                     <view class="scan-btn-glow"></view>
                 </button>
@@ -38,7 +39,7 @@
         <view class="search-container">
             <view class="search-box">
                 <text class="search-icon">🔍</text>
-                <input class="search-input" placeholder="搜索兰花品种、特征..." bindinput="onSearch" value="{{searchKeyword}}" />
+                <input class="search-input" placeholder="搜索兰花品种、特征..." value="{{searchKeyword}}" bindinput="onSearch"/>
                 <view class="search-btn" wx:if="{{searchKeyword}}" bindtap="clearSearch">
                     <text class="clear-icon">✕</text>
                 </view>
@@ -48,14 +49,20 @@
 
     <!-- 分类导航 -->
     <view class="category-nav">
-        <scroll-view class="category-scroll" scroll-x="true" show-scrollbar="false">
+        <scroll-view class="category-scroll" scroll-x="true" show-scrollbar="{{false}}">
             <view class="category-list">
-                <view class="category-item" wx:for="{{categories}}" wx:key="id" bindtap="selectCategory" data-id="{{category.id}}" class="{{selectedCategory === category.id ? 'active' : ''}}">
+                <view 
+                    class="category-item {{selectedCategory === item.id ? 'active' : ''}}" 
+                    wx:for="{{categories}}" 
+                    wx:key="id"
+                    bindtap="selectCategory"
+                    data-id="{{item.id}}"
+                >
                     <view class="category-icon-container">
-                        <text class="category-icon">{{category.icon}}</text>
+                        <text class="category-icon">{{item.icon}}</text>
                     </view>
-                    <text class="category-name">{{category.name}}</text>
-                    <view class="category-active-dot" wx:if="{{selectedCategory === category.id}}"></view>
+                    <text class="category-name">{{item.name}}</text>
+                    <view class="category-active-dot" wx:if="{{selectedCategory === item.id}}"></view>
                 </view>
             </view>
         </scroll-view>
@@ -65,43 +72,53 @@
     <view class="orchids-section">
         <view class="section-header">
             <view class="section-title-container">
-                <text class="section-title">{{getCurrentCategoryName()}}</text>
+                <text class="section-title">{{currentCategoryName}}</text>
                 <view class="section-count-badge">
-                    <text class="section-count">{{allOrchids.length}}</text>
+                    <text class="section-count">{{filteredOrchids.length}}</text>
                 </view>
             </view>
             <view class="section-decoration"></view>
         </view>
-
-        <view class="orchids-grid" wx:if="{{allOrchids.length > 0}}">
-            <view class="orchid-card" wx:for="{{allOrchids}}" wx:key="_id" bindtap="showOrchidDetail" data-orchid="{{orchid}}">
+        
+        <view class="orchids-grid" wx:if="{{filteredOrchids.length > 0}}">
+            <view 
+                class="orchid-card" 
+                wx:for="{{filteredOrchids}}" 
+                wx:key="_id"
+                bindtap="showOrchidDetail"
+                data-orchid="{{item}}"
+            >
                 <view class="card-image">
-                    <image class="orchid-image" src="{{orchid.image}}" mode="aspectFill"/>
+                    <image src="{{item.image}}" class="orchid-image" mode="aspectFill" lazy-load="{{true}}"/>
                     <view class="image-gradient"></view>
                     <view class="image-overlay">
-                        <view class="popularity-badge" wx:if="{{orchid.isPopular}}">
+                        <view class="popularity-badge" wx:if="{{item.isPopular}}">
                             <text class="badge-text">🔥 热门</text>
                         </view>
                     </view>
                 </view>
-
+                
                 <view class="card-content">
                     <view class="orchid-info">
-                        <text class="orchid-name">{{orchid.name}}</text>
-                        <text class="orchid-latin">{{orchid.latin}}</text>
+                        <text class="orchid-name">{{item.name}}</text>
+                        <text class="orchid-latin">{{item.latin}}</text>
                     </view>
-
+                    
                     <view class="orchid-features">
-                        <view class="feature-tag" wx:for="{{orchid.features.slice(0, 3)}}" wx:key="feature">
+                        <view class="feature-tag" wx:for="{{item.features}}" wx:for-item="feature" wx:key="*this" wx:if="{{index < 3}}">
                             <text class="feature-text">{{feature}}</text>
                         </view>
                     </view>
-
+                    
                     <view class="card-footer">
                         <view class="difficulty-section">
                             <text class="difficulty-label">难度</text>
                             <view class="difficulty-indicator">
-                                <view class="difficulty-dot" wx:for="{{5}}" wx:key="i" class="{{i <= orchid.difficulty ? 'active' : ''}}"></view>
+                                <view 
+                                    class="difficulty-dot {{index < item.difficulty ? 'active' : ''}}" 
+                                    wx:for="{{5}}" 
+                                    wx:key="*this"
+                                ></view>
                             </view>
                         </view>
                         <view class="detail-arrow">
@@ -109,17 +126,17 @@
                         </view>
                     </view>
                 </view>
-
+                
                 <view class="card-shine"></view>
             </view>
         </view>
 
         <!-- 空状态 -->
-        <view class="empty-state"  wx:if="{{!isLoading}}">
+        <view class="empty-state" wx:elif="{{!isLoading}}">
             <view class="empty-animation">
                 <text class="empty-icon">🌸</text>
                 <view class="empty-particles">
-                    <view class="particle" wx:for="{{6}}" wx:key="i"></view>
+                    <view class="particle" wx:for="{{6}}" wx:key="*this"></view>
                 </view>
             </view>
             <text class="empty-title">暂无相关数据</text>
@@ -128,7 +145,7 @@
                 <text class="refresh-text">🔄 刷新数据</text>
             </button>
         </view>
-
+        
         <!-- 加载更多 -->
         <view class="load-more" wx:if="{{hasMore && !isLoading}}">
             <button class="load-more-btn" bindtap="loadMore" disabled="{{loadingMore}}">
@@ -143,39 +160,39 @@
     <!-- 兰花详情弹窗 -->
     <view class="detail-modal" wx:if="{{showDetail}}" bindtap="closeDetail">
         <view class="modal-backdrop"></view>
-        <view class="modal-content" bindtap="stopPropagation">
+        <view class="modal-content" catchtap="preventClose">
             <view class="modal-header">
                 <button class="close-btn" bindtap="closeDetail">
                     <text class="close-icon">✕</text>
                 </button>
             </view>
-
+            
             <view class="detail-content" wx:if="{{selectedOrchid}}">
                 <view class="detail-image">
-                    <image class="detail-orchid-image" src="{{selectedOrchid.image}}" mode="aspectFill"/>
+                    <image src="{{selectedOrchid.image}}" class="detail-orchid-image" mode="aspectFill"/>
                     <view class="detail-image-overlay"></view>
                 </view>
-
+                
                 <view class="detail-info">
                     <view class="detail-title">
                         <text class="detail-name">{{selectedOrchid.name}}</text>
                         <text class="detail-latin">{{selectedOrchid.latin}}</text>
                     </view>
-
+                    
                     <view class="detail-description">
                         <text class="description-text">{{selectedOrchid.description}}</text>
                     </view>
-
+                    
                     <view class="detail-features">
                         <text class="features-title">🌟 主要特征</text>
                         <view class="features-grid">
-                            <view class="feature-item" wx:for="{{selectedOrchid.features}}" wx:key="feature">
+                            <view class="feature-item" wx:for="{{selectedOrchid.features}}" wx:for-item="feature" wx:key="*this">
                                 <view class="feature-bullet"></view>
                                 <text class="feature-desc">{{feature}}</text>
                             </view>
                         </view>
                     </view>
-
+                    
                     <view class="care-info">
                         <text class="care-title">🌱 养护指南</text>
                         <view class="care-grid">

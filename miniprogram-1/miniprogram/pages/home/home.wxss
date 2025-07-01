@@ -113,7 +113,7 @@
 }
 
 .app-name {
-  font-size: 44rpx;
+  font-size: 39rpx;
   font-weight: 700;
   margin-bottom: 4rpx;
 }

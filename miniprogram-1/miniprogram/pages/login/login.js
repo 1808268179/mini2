@@ -11,7 +11,7 @@ Page({
     // 检查是否已经登录
     if (app.globalData.userInfo && app.globalData.openid) {
       wx.redirectTo({
-        url: '/pages/index/index',
+        url: '/pages/home/home',
       });
     }
   },
@@ -63,7 +63,7 @@ Page({
                   // 登录成功，跳转到主页
                   setTimeout(() => {
                     wx.redirectTo({
-                      url: '/pages/index/index',
+                      url: '/pages/home/home',
                     });
                   }, 1500);
                 },
@@ -109,7 +109,7 @@ Page({
       success: (res) => {
         if (res.confirm) {
           wx.redirectTo({
-            url: '/pages/index/index',
+            url: '/pages/home/home',
           });
         }
       }
