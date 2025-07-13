@@ -42,6 +42,8 @@ Page({
     });
   },
 
+  // 在 miniprogram/pages/index/index.js 中修改 startRecognition 函数
+
   startRecognition() {
     if (!this.data.imageSrc) {
       wx.showToast({
@@ -76,38 +78,47 @@ Page({
           success: cfRes => {
             // cfRes.result 是云函数返回的对象
             if (cfRes.result.success) {
-                const data = cfRes.result.data;
-                const topResult = data.top5_info[0];
-                this.setData({
-                  result: {
-                    name: topResult.name,
-                    latin: '',
-                    confidence: topResult.confidence,
-                    features: []
-                  }
-                });
-                wx.showToast({
-                  title: '识别完成！',
-                  icon: 'success',
-                  duration: 2000
-                });
+              const data = cfRes.result.data;
+              const topResult = data.top5_info[0];
+              const result = {
+                name: topResult.name,
+                latin: '',
+                confidence: topResult.confidence,
+                features: []
+              };
+
+              this.setData({
+                result: {
+                  ...result,
+                  confidence: topResult.confidence.toFixed(4)
+                }
+              });
+
+              // 保存识别历史
+              this.saveRecognitionHistory(fileID, result);
+
+              wx.showToast({
+                title: '识别完成！',
+                icon: 'success',
+                duration: 2000
+              });
             } else {
-                 // 云函数处理失败
-                 wx.showToast({
-                    title: '识别服务出错',
-                    icon: 'error'
-                  });
+              // 云函数处理失败
+              wx.showToast({
+                title: '识别服务出错',
+                icon: 'error'
+              });
             }
           },
           fail: err => {
             wx.showToast({
-                title: '云函数调用失败',
-                icon: 'error'
-              });
+              title: '云函数调用失败',
+              icon: 'error'
+            });
           },
           complete: () => {
-              this.setData({ isLoading: false });
-              wx.hideLoading();
+            this.setData({ isLoading: false });
+            wx.hideLoading();
           }
         });
       },
@@ -123,30 +134,44 @@ Page({
     });
   },
 
-  clearResult() {
-    this.setData({
-      result: { name: '', latin: '', confidence: 0, features: [] }
-    });
-    wx.showToast({
-      title: '结果已清除',
-      icon: 'none',
-      duration: 1500
-    });
-  },
-
-  logout() {
-    wx.showModal({
-      title: '确认退出',
-      content: '确定要退出当前账户吗？',
-      success: (res) => {
-        if (res.confirm) {
-          wx.reLaunch({
-            url: '/pages/Login/Login'
+  // 新增保存识别历史的函数
+  saveRecognitionHistory(imageUrl, result) {
+    // 先获取用户openid
+    wx.cloud.callFunction({
+      name: 'quickstartFunctions',
+      data: {
+        type: 'getOpenId'
+      },
+      success: res => {
+        if (res.result.openid) {
+          // 保存识别历史
+          wx.cloud.callFunction({
+            name: 'quickstartFunctions',
+            data: {
+              type: 'saveRecognitionHistory',
+              data: {
+                openid: res.result.openid,
+                imageUrl: imageUrl,
+                result: result,
+                timestamp: Date.now()
+              }
+            },
+            success: historyRes => {
+              console.log('识别历史保存成功:', historyRes);
+            },
+            fail: err => {
+              console.error('识别历史保存失败:', err);
+            }
           });
         }
+      },
+      fail: err => {
+        console.error('获取openid失败:', err);
       }
     });
   },
+
+  // 删除了 logout 函数
 
   getConfidenceLevel(confidence) {
     if (confidence >= 0.9) return 'high';

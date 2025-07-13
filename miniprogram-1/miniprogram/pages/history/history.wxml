@@ -1,0 +1,78 @@
+<!-- miniprogram/pages/history/history.wxml -->
+<view class="history-container">
+  <!-- 加载中状态 -->
+  <view wx:if="{{isLoading && historyList.length === 0}}" class="loading-container">
+    <view class="loading-spinner"></view>
+  </view>
+
+  <!-- 空状态 -->
+  <view wx:elif="{{!isLoading && historyList.length === 0}}" class="empty-container">
+    <text class="empty-icon">📚</text>
+    <text class="empty-title">暂无识别历史</text>
+    <text class="empty-subtitle">去首页识别一朵兰花吧～</text>
+  </view>
+
+  <!-- 历史列表 -->
+  <view wx:else class="history-list">
+    <view 
+      class="history-item" 
+      wx:for="{{historyList}}" 
+      wx:key="_id"
+      wx:for-item="item"
+      wx:for-index="index"
+    >
+      <view class="item-header">
+        <view class="item-main">
+          <image 
+            class="item-image" 
+            src="{{item.imageUrl}}" 
+            mode="aspectFill"
+            data-url="{{item.imageUrl}}"
+            bindtap="previewImage"
+          ></image>
+          <view class="item-content">
+            <text class="item-title">{{item.result.name}}</text>
+            <text class="item-subtitle">{{item.result.latin || 'Orchidaceae Family'}}</text>
+            <view class="confidence-info">
+              <view class="confidence-badge {{getConfidenceLevel(item.result.confidence)}}">
+                {{item.result.confidence >= 0.9 ? '高' : item.result.confidence >= 0.7 ? '中' : '低'}}
+              </view>
+              <text class="confidence-text">{{(item.result.confidence * 100)}}%</text>
+            </view>
+            <text class="item-time">{{formatTime(item.timestamp)}}</text>
+          </view>
+        </view>
+        <view class="item-actions">
+          <button 
+            class="action-btn preview-btn" 
+            data-url="{{item.imageUrl}}"
+            bindtap="previewImage"
+          >
+            👁️
+          </button>
+          <button 
+            class="action-btn delete-btn" 
+            data-history-id="{{item._id}}"
+            data-index="{{index}}"
+            bindtap="deleteHistory"
+          >
+            🗑️
+          </button>
+        </view>
+      </view>
+    </view>
+
+    <!-- 加载更多 -->
+    <view wx:if="{{hasMore || isLoadingMore}}" class="load-more-container">
+      <view wx:if="{{isLoadingMore}}" class="load-more-spinner"></view>
+      <text class="load-more-text">
+        {{isLoadingMore ? '加载中...' : '上拉加载更多'}}
+      </text>
+    </view>
+    
+    <!-- 没有更多数据 -->
+    <view wx:if="{{!hasMore && historyList.length > 0}}" class="load-more-container">
+      <text class="load-more-text">没有更多数据了</text>
+    </view>
+  </view>
+</view>

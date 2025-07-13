@@ -54,12 +54,11 @@
       <view class="confidence-section">
         <view class="confidence-label">
           <text class="label-text">识别置信度</text>
-          <!-- <text class="confidence-value">{{(result.confidence * 100).toFixed(1)}}%</text> -->
           <text class="confidence-value">{{(result.confidence * 100)}}%</text>
         </view>
         <view class="progress-container">
           <view class="progress-track">
-            <view class="progress-fill" style="width: {{result.confidence * 100}}"></view>
+            <view class="progress-fill" style="width: {{result.confidence * 100}}%"></view>
           </view>
         </view>
       </view>
@@ -95,12 +94,15 @@
     </view>
   </view>
 
-  <!-- 底部退出按钮 -->
+  <!-- 底部信息区域 -->
   <view class="footer-section">
-    <button class="logout-btn" bindtap="logout" hover-class="logout-btn-active">
-      <text class="logout-icon">👋</text>
-      <text class="logout-text">退出登录</text>
-    </button>
+    <view class="app-info">
+      <text class="app-name">兰花识别助手</text>
+      <text class="app-version">v1.0.0</text>
+    </view>
+    <view class="powered-by">
+      <text class="powered-text">Powered by AI Technology</text>
+    </view>
   </view>
 
   <!-- 浮动提示 -->

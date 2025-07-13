@@ -4,7 +4,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0 40rpx 80rpx;
+  padding: 0 40rpx 60rpx;
   box-sizing: border-box;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   position: relative;
@@ -461,46 +461,51 @@
   font-size: 32rpx;
 }
 
-/* 底部区域 */
+/* 底部区域 - 替换退出登录为应用信息 */
 .footer-section {
   width: 100%;
   max-width: 760rpx;
+  text-align: center;
+  margin-top: 40rpx;
 }
 
-.logout-btn {
-  width: 100%;
-  height: 100rpx;
+.app-info {
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   gap: 20rpx;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  border: 2rpx solid rgba(255, 255, 255, 0.3);
-  border-radius: 50rpx;
-  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 20rpx;
+}
+
+.app-name {
   font-size: 32rpx;
-  font-weight: 500;
-  transition: all 0.3s ease;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
 }
 
-.logout-btn-active {
-  background: rgba(255, 255, 255, 0.3);
-  transform: scale(0.98);
+.app-version {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 6rpx 16rpx;
+  border-radius: 20rpx;
+  backdrop-filter: blur(10px);
 }
 
-.logout-icon {
-  font-size: 36rpx;
+.powered-by {
+  margin-bottom: 20rpx;
 }
 
-.logout-text {
-  font-size: 28rpx;
+.powered-text {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.6);
+  font-style: italic;
 }
 
 /* 浮动提示 */
 .floating-tips {
   position: fixed;
-  bottom: 240rpx;
+  bottom: 200rpx;
   left: 40rpx;
   right: 40rpx;
   background: rgba(255, 255, 255, 0.95);

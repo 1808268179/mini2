@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "识别历史",
+  "navigationBarBackgroundColor": "#667eea",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#667eea",
+  "enablePullDownRefresh": true,
+  "onReachBottomDistance": 50,
+  "usingComponents": {}
+}
