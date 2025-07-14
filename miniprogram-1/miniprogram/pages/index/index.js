@@ -83,7 +83,7 @@ Page({
               const result = {
                 name: topResult.name,
                 latin: '',
-                confidence: topResult.confidence,
+                confidence: topResult.confidence.toFixed(4),
                 features: []
               };
 

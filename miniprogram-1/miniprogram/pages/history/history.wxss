@@ -97,7 +97,8 @@
 }
 
 .item-subtitle {
-  font-size: 24rpx;
+  margin-left: 10rpx;
+  font-size: 28rpx;
   color: #666;
   font-style: italic;
   margin-bottom: 16rpx;
@@ -111,9 +112,9 @@
 }
 
 .confidence-badge {
-  padding: 6rpx 16rpx;
+  padding: 6rpx 0rpx;
   border-radius: 20rpx;
-  font-size: 20rpx;
+  font-size: 26rpx;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5rpx;
@@ -135,7 +136,7 @@
 }
 
 .confidence-text {
-  font-size: 24rpx;
+  font-size: 28rpx;
   color: #666;
 }
 
@@ -151,16 +152,21 @@
 }
 
 .action-btn {
-  width: 60rpx;
-  height: 60rpx;
+  width: 64rpx !important;
+  min-width: 64rpx;
+  height: 64rpx;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24rpx;
-  border: none;
-  padding: 0;
-  transition: all 0.3s ease;
+  font-size: 28rpx;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0;
+  line-height: 1;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
 }
 
 .preview-btn {

@@ -35,7 +35,7 @@
             <text class="item-subtitle">{{item.result.latin || 'Orchidaceae Family'}}</text>
             <view class="confidence-info">
               <view class="confidence-badge {{getConfidenceLevel(item.result.confidence)}}">
-                {{item.result.confidence >= 0.9 ? '高' : item.result.confidence >= 0.7 ? '中' : '低'}}
+                置信度：{{item.result.confidence >= 0.9 ? '高' : item.result.confidence >= 0.7 ? '中' : '低'}}
               </view>
               <text class="confidence-text">{{(item.result.confidence * 100)}}%</text>
             </view>
