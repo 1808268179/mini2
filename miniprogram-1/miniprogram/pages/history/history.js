@@ -193,6 +193,11 @@ Page({
     }
   },
 
+  // 格式化置信度百分比
+  formatConfidencePercent(confidence) {
+    return (confidence * 100).toFixed(2);
+  },
+
   getConfidenceLevel(confidence) {
     if (confidence >= 0.9) return 'high';
     if (confidence >= 0.7) return 'medium';

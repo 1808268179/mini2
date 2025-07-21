@@ -8,6 +8,7 @@ Page({
       name: '',
       latin: '',
       confidence: 0,
+      confidencePercent: '0.00',
       features: []
     }
   },
@@ -83,14 +84,16 @@ Page({
               const result = {
                 name: topResult.name,
                 latin: '',
-                confidence: topResult.confidence.toFixed(4),
+                confidence: topResult.confidence, // 保持原始数值用于保存
+                confidencePercent: (topResult.confidence * 100).toFixed(2), // 计算百分比显示值
                 features: []
               };
 
               this.setData({
                 result: {
                   ...result,
-                  confidence: topResult.confidence.toFixed(4)
+                  confidence: topResult.confidence,
+                  confidencePercent: (topResult.confidence * 100).toFixed(2)
                 }
               });
 
@@ -192,6 +195,7 @@ Page({
         name: '',
         latin: '',
         confidence: 0,
+        confidencePercent: '0.00',
         features: []
       }
     });

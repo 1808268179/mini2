@@ -37,7 +37,7 @@
               <view class="confidence-badge {{getConfidenceLevel(item.result.confidence)}}">
                 置信度：{{item.result.confidence >= 0.9 ? '高' : item.result.confidence >= 0.7 ? '中' : '低'}}
               </view>
-              <text class="confidence-text">{{(item.result.confidence * 100)}}%</text>
+              <text class="confidence-text">{{formatConfidencePercent(item.result.confidence)}}%</text>
             </view>
             <text class="item-time">{{formatTime(item.timestamp)}}</text>
           </view>
