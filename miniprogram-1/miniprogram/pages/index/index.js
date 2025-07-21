@@ -183,5 +183,22 @@ Page({
     if (confidence >= 0.9) return '高可信度';
     if (confidence >= 0.7) return '中等可信度';
     return '低可信度';
+  },
+
+  // 清除识别结果
+  clearResult() {
+    this.setData({
+      result: {
+        name: '',
+        latin: '',
+        confidence: 0,
+        features: []
+      }
+    });
+    wx.showToast({
+      title: '结果已清除',
+      icon: 'success',
+      duration: 1500
+    });
   }
 });

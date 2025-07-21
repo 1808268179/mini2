@@ -138,20 +138,53 @@ Page({
     }
 
     try {
-      // 这里可以调用云函数获取用户统计数据
-      // 暂时使用模拟数据
-      const stats = {
-        totalRecognitions: 25,
-        accurateRecognitions: 23,
-        favoriteCount: 8,
-        usageDays: 15
-      };
-      
-      this.setData({
-        stats: stats
+      // 调用云函数获取用户真实统计数据
+      const result = await wx.cloud.callFunction({
+        name: 'quickstartFunctions',
+        data: {
+          type: 'getUserStats',
+          data: {
+            openid: app.globalData.openid
+          }
+        }
       });
+
+      if (result.result && result.result.success) {
+        // 使用从云端获取的真实数据
+        const stats = result.result.data || {
+          totalRecognitions: 0,
+          accurateRecognitions: 0,
+          favoriteCount: 0,
+          usageDays: 0
+        };
+        
+        this.setData({
+          stats: stats
+        });
+        console.log('用户统计数据加载成功:', stats);
+      } else {
+        // 如果云函数调用失败，使用默认数据
+        this.setData({
+          stats: {
+            totalRecognitions: 0,
+            accurateRecognitions: 0,
+            favoriteCount: 0,
+            usageDays: 0
+          }
+        });
+        console.warn('用户统计数据加载失败，使用默认数据');
+      }
     } catch (error) {
       console.error('加载用户统计数据失败:', error);
+      // 错误时使用默认数据
+      this.setData({
+        stats: {
+          totalRecognitions: 0,
+          accurateRecognitions: 0,
+          favoriteCount: 0,
+          usageDays: 0
+        }
+      });
     }
   },
 
