@@ -132,42 +132,44 @@ Page({
   },
 
   // 加载用户统计数据
-  loadUserStats() {
+  async loadUserStats() {
     const openid = app.globalData.openid;
     if (!openid) {
       console.warn('用户未登录，无法加载统计数据');
       return;
     }
 
-    // 调用云函数获取用户真实统计数据
-    wx.cloud.callFunction({
-      name: 'quickstartFunctions',
-      data: {
-        type: 'getUserStats',
-        data: { openid }
-      },
-      success: (res) => {
-        if (res.result && res.result.success && res.result.data) {
-          // 使用从云端获取的真实数据
-          this.setData({
-            stats: res.result.data
-          });
-          console.log('用户统计数据加载成功:', res.result.data);
-        } else {
-          console.warn('云函数返回数据异常:', res.result);
-          this.setDefaultStats();
+    try {
+      // 调用云函数获取用户真实统计数据
+      const result = await wx.cloud.callFunction({
+        name: 'quickstartFunctions',
+        data: {
+          type: 'getUserStats',
+          data: {
+            openid: app.globalData.openid
+          }
         }
-      },
-      fail: (error) => {
-        console.error('调用云函数失败:', error);
-        this.setDefaultStats();
-        wx.showToast({
-          title: '数据加载失败',
-          icon: 'none',
-          duration: 2000
+      });
+
+      if (result.result && result.result.success && result.result.data) {
+        // 使用从云端获取的真实数据
+        this.setData({
+          stats: result.result.data
         });
+        console.log('用户统计数据加载成功:', result.result.data);
+      } else {
+        console.warn('云函数返回数据异常:', result.result);
+        this.setDefaultStats();
       }
-    });
+    } catch (error) {
+      console.error('调用云函数失败:', error);
+      this.setDefaultStats();
+      wx.showToast({
+        title: '数据加载失败',
+        icon: 'none',
+        duration: 2000
+      });
+    }
   },
 
   // 设置默认统计数据
