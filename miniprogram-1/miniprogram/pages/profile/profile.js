@@ -9,6 +9,8 @@ Page({
     canIUseNicknameComp: wx.canIUse('input.type.nickname'),
     isLoading: false,
     isUpdatingAvatar: false,
+    isFirstVisit: false, // 标记是否首次访问
+    showLoginPrompt: false, // 控制登录提示显示
     menuItems: [
       {
         id: 'history',
@@ -71,96 +73,119 @@ Page({
       });
     }
     
-    this.loadUserInfo();
-    this.loadUserStats();
+    // 初始化用户信息
+    this.initUserInfo();
   },
 
   onShow() {
-    // 每次显示页面时重新加载用户信息和统计数据
-    this.loadUserInfo();
-    this.loadUserStats();
+    // 每次显示页面时检查登录状态
+    this.checkLoginStatus();
   },
 
-  // 加载用户信息
-  async loadUserInfo() {
-    const userInfo = app.globalData.userInfo;
-    const openid = app.globalData.openid;
-    
-    if (userInfo && openid) {
-      this.setData({
-        userInfo: userInfo,
-        hasUserInfo: true
+  // 初始化用户信息
+  async initUserInfo() {
+    try {
+      // 检查全局是否已有用户信息
+      if (app.globalData.userInfo && app.globalData.openid) {
+        this.setData({
+          userInfo: app.globalData.userInfo,
+          hasUserInfo: true
+        });
+        this.loadUserStats();
+        return;
+      }
+
+      // 检查本地存储的登录状态
+      const hasEverLoggedIn = wx.getStorageSync('hasEverLoggedIn');
+      
+      if (!hasEverLoggedIn) {
+        // 首次使用，显示登录提示
+        this.setData({
+          isFirstVisit: true,
+          showLoginPrompt: true
+        });
+      } else {
+        // 曾经登录过，尝试自动登录
+        await this.autoLogin();
+      }
+    } catch (error) {
+      console.error('初始化用户信息失败:', error);
+      this.showDefaultState();
+    }
+  },
+
+  // 检查登录状态
+  async checkLoginStatus() {
+    if (this.data.hasUserInfo) {
+      this.loadUserStats();
+    }
+  },
+
+  // 自动登录
+  async autoLogin() {
+    try {
+      console.log('尝试自动登录...');
+      
+      // 调用云函数获取openid
+      const loginRes = await wx.cloud.callFunction({
+        name: 'login',
+        data: {}
       });
-    } else if (openid && !userInfo) {
-      // 有openid但没有userInfo，尝试从云端加载
-      try {
+      
+      if (loginRes.result && loginRes.result.openid) {
+        const openid = loginRes.result.openid;
+        app.globalData.openid = openid;
+        
+        // 从云端获取用户信息
         const result = await wx.cloud.callFunction({
           name: 'quickstartFunctions',
           data: {
             type: 'getUserInfo',
-            data: {
-              openid: openid
-            }
+            data: { openid: openid }
           }
         });
 
         if (result.result && result.result.success && result.result.data) {
-          const loadedUserInfo = result.result.data.userInfo;
-          app.globalData.userInfo = loadedUserInfo;
+          // 找到用户信息，自动登录成功
+          const userInfo = result.result.data.userInfo;
+          app.globalData.userInfo = userInfo;
+          
           this.setData({
-            userInfo: loadedUserInfo,
-            hasUserInfo: true
+            userInfo: userInfo,
+            hasUserInfo: true,
+            showLoginPrompt: false
           });
-          console.log('从云端加载用户信息成功:', loadedUserInfo);
+          
+          console.log('自动登录成功');
+          this.loadUserStats();
         } else {
-          // 云端没有用户信息，显示默认状态
-          this.setData({
-            hasUserInfo: false
-          });
+          // 用户信息不存在，可能是新用户或数据丢失
+          console.log('用户信息不存在，显示登录界面');
+          this.showDefaultState();
         }
-      } catch (error) {
-        console.error('从云端加载用户信息失败:', error);
-        this.setData({
-          hasUserInfo: false
-        });
       }
-    } else {
-      this.setData({
-        hasUserInfo: false
-      });
-    }
-  },
-
-  // 加载用户统计数据
-  async loadUserStats() {
-    if (!app.globalData.openid) {
-      return;
-    }
-
-    try {
-      // 这里可以调用云函数获取用户统计数据
-      // 暂时使用模拟数据
-      const stats = {
-        totalRecognitions: 25,
-        accurateRecognitions: 23,
-        favoriteCount: 8,
-        usageDays: 15
-      };
-      
-      this.setData({
-        stats: stats
-      });
     } catch (error) {
-      console.error('加载用户统计数据失败:', error);
+      console.error('自动登录失败:', error);
+      this.showDefaultState();
     }
   },
 
-  // 新版用户登录 - 使用头像昵称填写能力
+  // 显示默认状态（未登录）
+  showDefaultState() {
+    this.setData({
+      userInfo: null,
+      hasUserInfo: false,
+      showLoginPrompt: true
+    });
+  },
+
+  // 用户登录
   async handleLogin() {
     if (this.data.isLoading) return;
 
     this.setData({
-      isLoading: true
+      isLoading: true,
+      showLoginPrompt: false
     });
 
     wx.showLoading({
@@ -168,7 +193,7 @@ Page({
     });
 
     try {
-      // 先调用云函数获取openid
+      // 1. 获取openid
       const loginRes = await wx.cloud.callFunction({
         name: 'login',
         data: {}
@@ -178,7 +203,7 @@ Page({
       const openid = loginRes.result.openid;
       app.globalData.openid = openid;
 
-      // 尝试从云端获取已保存的用户信息
+      // 2. 尝试从云端获取已保存的用户信息
       let userInfo = null;
       let userExists = false;
       
@@ -187,9 +212,7 @@ Page({
           name: 'quickstartFunctions',
           data: {
             type: 'getUserInfo',
-            data: {
-              openid: openid
-            }
+            data: { openid: openid }
           }
         });
 
@@ -202,11 +225,11 @@ Page({
         console.log('获取已保存用户信息失败:', error);
       }
 
-      // 如果没有找到已保存的用户信息，创建默认信息并保存到云端
+      // 3. 如果没有找到用户信息，创建默认信息
       if (!userInfo) {
         userInfo = {
           nickName: '微信用户',
-          avatarUrl: '/images/default-avatar.png' // 需要添加一个默认头像
+          avatarUrl: '/images/default-avatar.png'
         };
         
         // 保存默认用户信息到云端
@@ -218,17 +241,22 @@ Page({
         }
       }
       
+      // 4. 更新应用状态
       app.globalData.userInfo = userInfo;
+      
+      // 5. 标记用户已登录过
+      wx.setStorageSync('hasEverLoggedIn', true);
 
       wx.hideLoading();
       this.setData({
         isLoading: false,
         userInfo: userInfo,
-        hasUserInfo: true
+        hasUserInfo: true,
+        isFirstVisit: false
       });
 
       const message = !userExists ? 
-        '登录成功，请设置头像昵称' : 
+        '登录成功！欢迎使用兰花识别' : 
         '欢迎回来！';
       
       wx.showToast({
@@ -243,7 +271,8 @@ Page({
     } catch (error) {
       wx.hideLoading();
       this.setData({
-        isLoading: false
+        isLoading: false,
+        showLoginPrompt: true
       });
       wx.showToast({
         title: '登录失败，请重试',
@@ -253,8 +282,68 @@ Page({
     }
   },
 
-  // 选择头像 - 使用新的方法
+  // 拒绝登录
+  handleRejectLogin() {
+    this.setData({
+      showLoginPrompt: false
+    });
+    wx.showToast({
+      title: '部分功能需要登录后使用',
+      icon: 'none',
+      duration: 3000
+    });
+  },
+
+  // 加载用户统计数据
+  async loadUserStats() {
+    const openid = app.globalData.openid;
+    if (!openid) {
+      this.setDefaultStats();
+      return;
+    }
+  
+    try {
+      const result = await wx.cloud.callFunction({
+        name: 'quickstartFunctions',
+        data: {
+          type: 'getUserStats',
+          data: { openid: openid }
+        }
+      });
+      
+      if (result.result && result.result.success) {
+        this.setData({ stats: result.result.data });
+      } else {
+        this.setDefaultStats();
+      }
+    } catch (error) {
+      console.error('获取用户统计失败:', error);
+      this.setDefaultStats();
+    }
+  },
+
+  // 设置默认统计数据
+  setDefaultStats() {
+    this.setData({
+      stats: {
+        totalRecognitions: 0,
+        accurateRecognitions: 0,
+        favoriteCount: 0,
+        usageDays: 0
+      }
+    });
+  },
+
+  // 选择头像
   async chooseAvatar() {
+    if (!this.data.hasUserInfo) {
+      wx.showToast({
+        title: '请先登录',
+        icon: 'none'
+      });
+      return;
+    }
+
     if (this.data.isUpdatingAvatar) return;
     
     this.setData({
@@ -262,10 +351,9 @@ Page({
     });
 
     try {
-      // 选择图片
       const res = await wx.chooseImage({
         count: 1,
-        sizeType: ['compressed'], // 压缩图片
+        sizeType: ['compressed'],
         sourceType: ['album', 'camera']
       });
 
@@ -324,35 +412,36 @@ Page({
 
   // 选择头像的回调（兼容旧版本）
   onChooseAvatar(e) {
-    const { avatarUrl } = e.detail; // 这是临时路径
+    if (!this.data.hasUserInfo) {
+      wx.showToast({
+        title: '请先登录',
+        icon: 'none'
+      });
+      return;
+    }
+
+    const { avatarUrl } = e.detail;
 
     wx.showLoading({
       title: '正在上传...',
     });
 
-    // 1. 定义云存储路径
     const cloudPath = `avatars/${app.globalData.openid}-${Date.now()}.png`;
 
-    // 2. 将图片上传到云存储
     wx.cloud.uploadFile({
-      cloudPath: cloudPath, // 上传至云端的路径
-      filePath: avatarUrl,  // 小程序临时文件路径
+      cloudPath: cloudPath,
+      filePath: avatarUrl,
       success: res => {
-        // 上传成功后，res.fileID 是文件的永久访问ID
         console.log('上传成功', res.fileID);
         
-        // 3. 将永久的 fileID 更新到 userInfo 对象中
         const userInfo = { ...this.data.userInfo, avatarUrl: res.fileID };
         
         this.setData({
           userInfo: userInfo
         });
         
-        // 更新全局数据
-        app.updateUserInfo(userInfo);
-        
-        // 4. 将包含永久 fileID 的 userInfo 保存到云数据库
-        this.saveUserInfo(userInfo);
+        app.globalData.userInfo = userInfo;
+        this.saveUserInfoToCloud(app.globalData.openid, userInfo);
         
         wx.showToast({
           title: '头像更新成功',
@@ -374,9 +463,17 @@ Page({
 
   // 输入昵称
   onInputNickname(e) {
+    if (!this.data.hasUserInfo) {
+      wx.showToast({
+        title: '请先登录',
+        icon: 'none'
+      });
+      return;
+    }
+
     const nickName = e.detail.value;
     if (!nickName.trim()) {
-      return; // 空昵称不保存
+      return;
     }
     
     const userInfo = { ...this.data.userInfo, nickName: nickName.trim() };
@@ -385,10 +482,7 @@ Page({
       userInfo: userInfo
     });
     
-    // 更新全局数据
     app.globalData.userInfo = userInfo;
-    
-    // 保存用户信息到云端
     this.saveUserInfoToCloud(app.globalData.openid, userInfo);
     
     wx.showToast({
@@ -405,7 +499,6 @@ Page({
     }
 
     try {
-      // 调用云函数保存用户信息
       const result = await wx.cloud.callFunction({
         name: 'quickstartFunctions',
         data: {
@@ -430,20 +523,21 @@ Page({
     }
   },
 
-  // 保存用户信息到云数据库（兼容旧版本调用）
-  async saveUserInfo(userInfo) {
-    try {
-      await this.saveUserInfoToCloud(app.globalData.openid, userInfo);
-    } catch (error) {
-      wx.showToast({
-        title: '保存失败，请重试',
-        icon: 'none'
-      });
-    }
-  },
-
   // 处理菜单项点击
   handleMenuItemTap(e) {
+    if (!this.data.hasUserInfo) {
+      wx.showModal({
+        title: '需要登录',
+        content: '此功能需要登录后使用，是否立即登录？',
+        success: (res) => {
+          if (res.confirm) {
+            this.handleLogin();
+          }
+        }
+      });
+      return;
+    }
+
     const item = e.currentTarget.dataset.item;
     
     if (item.url) {
@@ -523,6 +617,9 @@ Page({
       content: '确定要退出登录吗？',
       success: (res) => {
         if (res.confirm) {
+          // 清除本地存储
+          wx.removeStorageSync('hasEverLoggedIn');
+          
           // 清除全局数据
           app.globalData.userInfo = null;
           app.globalData.openid = null;
@@ -531,6 +628,7 @@ Page({
           this.setData({
             userInfo: null,
             hasUserInfo: false,
+            showLoginPrompt: true,
             stats: {
               totalRecognitions: 0,
               accurateRecognitions: 0,

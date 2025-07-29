@@ -18,71 +18,37 @@ App({
         env: this.globalData.env,
         traceUser: true,
       });
-      
-      // 应用启动时尝试自动登录
-      this.autoLogin();
     }
-  },
-
-  // 自动登录函数
-  async autoLogin() {
-    try {
-      // 调用云函数获取openid
-      const loginRes = await wx.cloud.callFunction({
-        name: 'login',
-        data: {}
-      });
-      
-      if (loginRes.result && loginRes.result.openid) {
-        console.log('[自动登录] 获取到 openid:', loginRes.result.openid);
-        this.globalData.openid = loginRes.result.openid;
-        
-        // 尝试从云数据库获取用户信息
-        await this.loadUserInfo();
-      }
-    } catch (error) {
-      console.log('[自动登录] 失败:', error);
-      // 自动登录失败不影响应用正常使用
-    }
-  },
-
-  // 从云数据库加载用户信息
-  async loadUserInfo() {
-    if (!this.globalData.openid) {
-      return;
-    }
-
-    try {
-      const result = await wx.cloud.callFunction({
-        name: 'quickstartFunctions',
-        data: {
-          type: 'getUserInfo',
-          data: {
-            openid: this.globalData.openid
-          }
-        }
-      });
-
-      if (result.result && result.result.success && result.result.data) {
-        this.globalData.userInfo = result.result.data.userInfo;
-        console.log('[加载用户信息] 成功:', this.globalData.userInfo);
-      } else {
-        console.log('[加载用户信息] 用户信息不存在，使用默认信息');
-        // 用户信息不存在时，不设置默认信息，让页面处理
-      }
-    } catch (error) {
-      console.error('[加载用户信息] 失败:', error);
-    }
+    
+    console.log('小程序启动完成');
   },
 
   // 更新全局用户信息
   updateUserInfo(userInfo) {
     this.globalData.userInfo = userInfo;
+    console.log('全局用户信息已更新:', userInfo);
   },
 
   // 清除用户信息
   clearUserInfo() {
     this.globalData.userInfo = null;
     this.globalData.openid = null;
+    console.log('全局用户信息已清除');
+  },
+
+  // 检查登录状态
+  checkLoginStatus() {
+    return {
+      isLoggedIn: !!(this.globalData.openid && this.globalData.userInfo),
+      openid: this.globalData.openid,
+      userInfo: this.globalData.userInfo
+    };
+  },
+
+  // 设置用户登录信息
+  setUserLogin(openid, userInfo) {
+    this.globalData.openid = openid;
+    this.globalData.userInfo = userInfo;
+    console.log('用户登录信息已设置:', { openid, userInfo });
   }
 });

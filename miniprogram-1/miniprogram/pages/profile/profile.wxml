@@ -6,11 +6,54 @@
     <view class="bg-gradient"></view>
   </view>
 
+  <!-- 登录提示弹窗 -->
+  <view wx:if="{{showLoginPrompt && !hasUserInfo}}" class="login-modal">
+    <view class="modal-mask" bindtap="handleRejectLogin"></view>
+    <view class="modal-content">
+      <view class="modal-header">
+        <view class="welcome-icon">🌺</view>
+        <text class="welcome-title">欢迎使用兰花识别</text>
+        <text class="welcome-subtitle">登录后可享受更多个性化功能</text>
+      </view>
+      
+      <view class="feature-list">
+        <view class="feature-item">
+          <view class="feature-icon">📚</view>
+          <text class="feature-text">保存识别历史记录</text>
+        </view>
+        <view class="feature-item">
+          <view class="feature-icon">❤️</view>
+          <text class="feature-text">收藏喜欢的兰花</text>
+        </view>
+        <view class="feature-item">
+          <view class="feature-icon">📊</view>
+          <text class="feature-text">查看个人数据统计</text>
+        </view>
+      </view>
+      
+      <view class="modal-actions">
+        <button 
+          class="action-btn secondary-btn" 
+          bindtap="handleRejectLogin"
+        >
+          暂不登录
+        </button>
+        <button 
+          class="action-btn primary-btn {{isLoading ? 'loading' : ''}}" 
+          bindtap="handleLogin"
+          disabled="{{isLoading}}"
+        >
+          <view wx:if="{{isLoading}}" class="loading-spinner"></view>
+          <text>{{isLoading ? '登录中...' : '微信登录'}}</text>
+        </button>
+      </view>
+    </view>
+  </view>
+
   <!-- 用户信息卡片 -->
   <view class="user-card">
     <view wx:if="{{hasUserInfo}}" class="user-info-logged">
       <view class="avatar-section">
-        <!-- <view class="avatar-glow"></view> -->
         <!-- 使用新的头像选择器 -->
         <button 
           class="avatar-button" 
@@ -52,19 +95,19 @@
     <view wx:else class="user-info-guest">
       <view class="guest-avatar">
         <view class="avatar-placeholder">
-          <text class="avatar-text">未登录</text>
+          <text class="avatar-text">🌸</text>
         </view>
       </view>
       <view class="guest-content">
-        <text class="guest-title">登录解锁更多功能</text>
-        <text class="guest-desc">保存识别记录 · 收藏兰花品种 · 个性化推荐</text>
+        <text class="guest-title">体验兰花识别功能</text>
+        <text class="guest-desc">无需登录即可使用基础识别功能</text>
         <button 
           class="login-button {{isLoading ? 'loading' : ''}}" 
           bindtap="handleLogin"
           disabled="{{isLoading}}"
         >
           <view wx:if="{{isLoading}}" class="loading-spinner"></view>
-          <text>{{isLoading ? '登录中' : '立即登录'}}</text>
+          <text>{{isLoading ? '登录中' : '登录解锁更多'}}</text>
         </button>
       </view>
     </view>
@@ -104,6 +147,17 @@
     </view>
   </view>
 
+  <!-- 提示卡片（未登录状态） -->
+  <view wx:else class="hint-card">
+    <view class="hint-content">
+      <view class="hint-icon">💡</view>
+      <view class="hint-text">
+        <text class="hint-title">温馨提示</text>
+        <text class="hint-desc">登录后可保存识别记录、收藏兰花品种，享受更完整的使用体验</text>
+      </view>
+    </view>
+  </view>
+
   <!-- 功能菜单 -->
   <view class="menu-section">
     <view class="section-header">
@@ -112,7 +166,7 @@
     </view>
     <view class="menu-grid">
       <view 
-        class="menu-card" 
+        class="menu-card {{!hasUserInfo ? 'menu-card-disabled' : ''}}" 
         wx:for="{{menuItems}}" 
         wx:key="id"
         data-item="{{item}}"
@@ -122,6 +176,9 @@
           <image class="menu-icon" src="{{item.icon}}" mode="aspectFit"></image>
           <view wx:if="{{item.badge}}" class="menu-badge {{item.badge === 'new' ? 'badge-new' : 'badge-number'}}">
             {{item.badge}}
+          </view>
+          <view wx:if="{{!hasUserInfo}}" class="lock-overlay">
+            <text class="lock-icon">🔒</text>
           </view>
         </view>
         <text class="menu-title">{{item.title}}</text>

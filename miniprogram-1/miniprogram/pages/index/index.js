@@ -83,14 +83,14 @@ Page({
               const result = {
                 name: topResult.name,
                 latin: '',
-                confidence: topResult.confidence.toFixed(4),
+                confidence: (topResult.confidence*100).toFixed(2),
                 features: []
               };
 
               this.setData({
                 result: {
                   ...result,
-                  confidence: topResult.confidence.toFixed(4)
+                  confidence: (topResult.confidence*100).toFixed(2)
                 }
               });
 
@@ -183,5 +183,21 @@ Page({
     if (confidence >= 0.9) return '高可信度';
     if (confidence >= 0.7) return '中等可信度';
     return '低可信度';
+  },
+
+  clearResult() {
+    this.setData({
+      result: {
+        name: '',
+        latin: '',
+        confidence: 0,
+        features: []
+      }
+    });
+    wx.showToast({
+      title: '结果已清除',
+      icon: 'success',
+      duration: 1500
+    });
   }
 });

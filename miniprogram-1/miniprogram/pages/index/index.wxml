@@ -54,7 +54,7 @@
       <view class="confidence-section">
         <view class="confidence-label">
           <text class="label-text">识别置信度</text>
-          <text class="confidence-value">{{(result.confidence * 100)}}%</text>
+          <text class="confidence-value">{{(result.confidence )}}%</text>
         </view>
         <view class="progress-container">
           <view class="progress-track">
