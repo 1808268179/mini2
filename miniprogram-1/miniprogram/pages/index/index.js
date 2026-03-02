@@ -8,8 +8,24 @@ Page({
       name: '',
       latin: '',
       confidence: 0,
+      confidencePercent: '0.00',
       features: []
     }
+  },
+
+  normalizeConfidence(rawConfidence) {
+    const numericValue = Number(rawConfidence);
+    if (!Number.isFinite(numericValue)) {
+      return { ratio: 0, percent: '0.00' };
+    }
+
+    const ratio = numericValue > 1 ? numericValue / 100 : numericValue;
+    const safeRatio = Math.min(Math.max(ratio, 0), 1);
+
+    return {
+      ratio: safeRatio,
+      percent: (safeRatio * 100).toFixed(2)
+    };
   },
 
   chooseImage() {
@@ -22,7 +38,7 @@ Page({
         setTimeout(() => {
           this.setData({
             imageSrc: res.tempFilePaths[0],
-            result: { name: '', latin: '', confidence: 0, features: [] },
+            result: { name: '', latin: '', confidence: 0, confidencePercent: '0.00', features: [] },
             isUploading: false
           });
           wx.showToast({
@@ -80,18 +96,17 @@ Page({
             if (cfRes.result.success) {
               const data = cfRes.result.data;
               const topResult = data.top5_info[0];
+              const confidenceData = this.normalizeConfidence(topResult.confidence);
               const result = {
                 name: topResult.name,
                 latin: '',
-                confidence: (topResult.confidence*100).toFixed(2),
+                confidence: confidenceData.ratio,
+                confidencePercent: confidenceData.percent,
                 features: []
               };
 
               this.setData({
-                result: {
-                  ...result,
-                  confidence: (topResult.confidence*100).toFixed(2)
-                }
+                result
               });
 
               // 保存识别历史
@@ -174,14 +189,16 @@ Page({
   // 删除了 logout 函数
 
   getConfidenceLevel(confidence) {
-    if (confidence >= 0.9) return 'high';
-    if (confidence >= 0.7) return 'medium';
+    const ratio = confidence > 1 ? confidence / 100 : confidence;
+    if (ratio >= 0.9) return 'high';
+    if (ratio >= 0.7) return 'medium';
     return 'low';
   },
 
   getConfidenceText(confidence) {
-    if (confidence >= 0.9) return '高可信度';
-    if (confidence >= 0.7) return '中等可信度';
+    const ratio = confidence > 1 ? confidence / 100 : confidence;
+    if (ratio >= 0.9) return '高可信度';
+    if (ratio >= 0.7) return '中等可信度';
     return '低可信度';
   },
 
@@ -191,6 +208,7 @@ Page({
         name: '',
         latin: '',
         confidence: 0,
+        confidencePercent: '0.00',
         features: []
       }
     });
