@@ -1,6 +1,8 @@
 /* pages/profile/profile.wxss */
 .container {
   min-height: 100vh;
+  display: block;
+  width: 100%;
   background: linear-gradient(180deg, #667eea 0%, #764ba2 20%, #f8fafc 20%, #f8fafc 100%);
   position: relative;
   overflow: hidden;
@@ -690,9 +692,11 @@
 /* 设置菜单 */
 .settings-section {
   margin: 0 30rpx 30rpx;
+  width: auto;
 }
 
 .settings-list {
+  width: 100%;
   background: #fff;
   border-radius: 24rpx;
   overflow: hidden;

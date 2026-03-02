@@ -55,8 +55,9 @@ Page({
             success: historyRes => {
               if (historyRes.result.success) {
                 const { list, hasMore } = historyRes.result.data;
+                const mappedList = list.map(item => this.enrichHistoryItem(item));
                 this.setData({
-                  historyList: [...this.data.historyList, ...list],
+                  historyList: [...this.data.historyList, ...mappedList],
                   hasMore: hasMore,
                   isLoading: false
                 });
@@ -165,6 +166,22 @@ Page({
     });
   },
 
+
+
+  enrichHistoryItem(item) {
+    const confidenceRaw = item && item.result ? item.result.confidence : 0;
+    const confidenceRatio = this.normalizeConfidence(confidenceRaw);
+    const confidenceLevelClass = this.getConfidenceLevel(confidenceRatio);
+    const confidenceLevelText = confidenceRatio >= 0.9 ? '高' : confidenceRatio >= 0.7 ? '中' : '低';
+
+    return {
+      ...item,
+      confidenceLevelClass,
+      confidenceLevelText,
+      confidencePercent: (confidenceRatio * 100).toFixed(2)
+    };
+  },
+
   previewImage(e) {
     const { url } = e.currentTarget.dataset;
     wx.previewImage({
@@ -210,8 +227,5 @@ Page({
     return Math.min(Math.max(ratio, 0), 1);
   },
 
-  formatConfidencePercent(confidence) {
-    return (this.normalizeConfidence(confidence) * 100).toFixed(2);
-  },
 
 });
