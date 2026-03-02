@@ -171,19 +171,19 @@
                 <view class="detail-image">
                     <image src="{{selectedOrchid.image}}" class="detail-orchid-image" mode="aspectFill"/>
                     <view class="detail-image-overlay"></view>
-                </view>
-                
-                <view class="detail-info">
-                    <view class="detail-title">
+                    <view class="detail-hero">
                         <text class="detail-name">{{selectedOrchid.name}}</text>
                         <text class="detail-latin">{{selectedOrchid.latin}}</text>
                     </view>
-                    
-                    <view class="detail-description">
+                </view>
+                
+                <view class="detail-info">
+                    <view class="section-card detail-description">
+                        <text class="section-subtitle">品种介绍</text>
                         <text class="description-text">{{selectedOrchid.description}}</text>
                     </view>
                     
-                    <view class="detail-features">
+                    <view class="section-card detail-features">
                         <text class="features-title">🌟 主要特征</text>
                         <view class="features-grid">
                             <view class="feature-item" wx:for="{{selectedOrchid.features}}" wx:for-item="feature" wx:key="*this">
@@ -193,7 +193,7 @@
                         </view>
                     </view>
                     
-                    <view class="care-info">
+                    <view class="care-info section-card">
                         <text class="care-title">🌱 养护指南</text>
                         <view class="care-grid">
                             <view class="care-item">

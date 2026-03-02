@@ -55,8 +55,9 @@ Page({
             success: historyRes => {
               if (historyRes.result.success) {
                 const { list, hasMore } = historyRes.result.data;
+                const mappedList = list.map(item => this.enrichHistoryItem(item));
                 this.setData({
-                  historyList: [...this.data.historyList, ...list],
+                  historyList: [...this.data.historyList, ...mappedList],
                   hasMore: hasMore,
                   isLoading: false
                 });
@@ -165,6 +166,22 @@ Page({
     });
   },
 
+
+
+  enrichHistoryItem(item) {
+    const confidenceRaw = item && item.result ? item.result.confidence : 0;
+    const confidenceRatio = this.normalizeConfidence(confidenceRaw);
+    const confidenceLevelClass = this.getConfidenceLevel(confidenceRatio);
+    const confidenceLevelText = confidenceRatio >= 0.9 ? '高' : confidenceRatio >= 0.7 ? '中' : '低';
+
+    return {
+      ...item,
+      confidenceLevelClass,
+      confidenceLevelText,
+      confidencePercent: (confidenceRatio * 100).toFixed(2)
+    };
+  },
+
   previewImage(e) {
     const { url } = e.currentTarget.dataset;
     wx.previewImage({
@@ -194,8 +211,21 @@ Page({
   },
 
   getConfidenceLevel(confidence) {
-    if (confidence >= 0.9) return 'high';
-    if (confidence >= 0.7) return 'medium';
+    const ratio = this.normalizeConfidence(confidence);
+    if (ratio >= 0.9) return 'high';
+    if (ratio >= 0.7) return 'medium';
     return 'low';
-  }
+  },
+
+  normalizeConfidence(confidence) {
+    const numeric = Number(confidence);
+    if (!Number.isFinite(numeric)) {
+      return 0;
+    }
+
+    const ratio = numeric > 1 ? numeric / 100 : numeric;
+    return Math.min(Math.max(ratio, 0), 1);
+  },
+
+
 });
