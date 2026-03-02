@@ -194,8 +194,24 @@ Page({
   },
 
   getConfidenceLevel(confidence) {
-    if (confidence >= 0.9) return 'high';
-    if (confidence >= 0.7) return 'medium';
+    const ratio = this.normalizeConfidence(confidence);
+    if (ratio >= 0.9) return 'high';
+    if (ratio >= 0.7) return 'medium';
     return 'low';
-  }
+  },
+
+  normalizeConfidence(confidence) {
+    const numeric = Number(confidence);
+    if (!Number.isFinite(numeric)) {
+      return 0;
+    }
+
+    const ratio = numeric > 1 ? numeric / 100 : numeric;
+    return Math.min(Math.max(ratio, 0), 1);
+  },
+
+  formatConfidencePercent(confidence) {
+    return (this.normalizeConfidence(confidence) * 100).toFixed(2);
+  },
+
 });

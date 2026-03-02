@@ -4,6 +4,8 @@
   background: linear-gradient(180deg, #667eea 0%, #764ba2 20%, #f8fafc 20%, #f8fafc 100%);
   position: relative;
   overflow: hidden;
+  padding-bottom: 40rpx;
+  box-sizing: border-box;
 }
 
 /* 顶部背景 */
@@ -161,7 +163,7 @@
 
 /* 用户信息卡片 */
 .user-card {
-  margin: 60rpx 30rpx 30rpx;
+  margin: 120rpx 30rpx 30rpx;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20rpx);
   border-radius: 32rpx;
@@ -174,7 +176,7 @@
 
 .user-info-logged {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   position: relative;
 }
 
@@ -236,6 +238,7 @@
 
 .user-content {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
 }
@@ -243,6 +246,7 @@
 .user-main {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   margin-bottom: 12rpx;
 }
 
@@ -258,7 +262,9 @@
   border: none;
   padding: 0;
   min-width: 200rpx;
+  max-width: 320rpx;
 }
+
 
 .username {
   font-size: 36rpx;
@@ -283,6 +289,7 @@
   font-size: 24rpx;
   color: #6b7280;
   line-height: 1.5;
+  word-break: break-all;
 }
 
 .settings-btn {
@@ -437,6 +444,8 @@
 .stats-content {
   display: flex;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16rpx 0;
 }
 
 .stat-item {
@@ -444,6 +453,7 @@
   flex-direction: column;
   align-items: center;
   flex: 1;
+  min-width: 25%;
 }
 
 .stat-circle {
@@ -873,7 +883,7 @@
 /* 响应式设计 */
 @media screen and (max-width: 375px) {
   .user-card {
-    margin: 100rpx 20rpx 30rpx; 
+    margin: 140rpx 20rpx 30rpx; 
     padding: 30rpx;
   }
   
